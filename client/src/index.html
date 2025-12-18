@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Soil Health Advisor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7f6;
+      padding: 20px;
+    }
+    .card {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 15px;
+      background: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      background: #eef6ee;
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>🌱 Soil Health Advisor</h2>
+
+  <label>Soil pH</label>
+  <input type="number" step="0.1" id="ph" value="6.5">
+
+  <label>Moisture (%)</label>
+  <input type="number" id="moisture" value="30">
+
+  <label>Nitrogen (mg/kg)</label>
+  <input type="number" id="nitrogen" value="150">
+
+  <label>Soil Type</label>
+  <select id="soil_type">
+    <option value="black">Black Soil</option>
+    <option value="red">Red Soil</option>
+    <option value="alluvial">Alluvial Soil</option>
+  </select>
+
+  <button onclick="submitData()">Get Recommendation</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+async function submitData() {
+  const data = {
+    ph: Number(document.getElementById("ph").value),
+    moisture: Number(document.getElementById("moisture").value),
+    nitrogen: Number(document.getElementById("nitrogen").value),
+    soil_type: document.getElementById("soil_type").value
+  };
+
+  const res = await fetch("http://127.0.0.1:8000/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  document.getElementById("result").innerHTML = `
+    <b>Soil Condition:</b> ${result.condition}<br>
+    <b>Water Required:</b> ${result.water_need} L/week<br>
+    <b>Recommended Crops:</b>
+    <ul>${result.crops.map(c => `<li>${c}</li>`).join("")}</ul>
+  `;
+}
+</script>
+
+</body>
+</html>
